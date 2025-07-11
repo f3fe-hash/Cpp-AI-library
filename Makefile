@@ -72,7 +72,7 @@ $(BUILD_DIR)/%.cpp.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 # Rule to compile Fortran source files into object files
 $(BUILD_DIR)/%.f90.o: $(SRC_DIR)/%.f90 | $(BUILD_DIR)
 	@printf "$(YELLOW)Building Fortran object $@... $(RESET)"
-	@$(GFORT) $(GFORTFLAGS) -I$(INC_DIR) -c $< -o $@
+	@$(GFORT) $(GFORTFLAGS) -I$(INC_DIR) -c $< -o $@ -J$(BUILD_DIR) # -J<directory> tells gfortran where to place .mod files
 	@printf "$(YELLOW)Done $(RESET)\n"
 
 # Rule to create the static library

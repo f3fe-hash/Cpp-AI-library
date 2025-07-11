@@ -29,6 +29,6 @@ void* nn_calc(void* args)
     for (int i = 0; i < nnargs->num_weights; i++)
         sum += nnargs->weights[i] * nnargs->input[i];
 
-    double out = nnargs->activation(sum);
+    double out = nnargs->activation(&sum);
     return (void *)&out;
 }

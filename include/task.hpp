@@ -10,7 +10,7 @@ typedef struct
     double* weights;
     double bias;
     int num_weights;
-    double (*activation)(double);
+    double (*activation)(double*);
 } NNArgs;
 
 typedef struct

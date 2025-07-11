@@ -54,13 +54,15 @@ typedef struct
 {
     std::vector<double> connections; // Representing weights
     double bias;                     // Bias term
+    double output;
 } Neuron;
 
 class NeuralNetwork
 {
     std::vector<std::vector<Neuron>> layers; // Each layer contains a vector of Neurons
-    std::vector<double(*)(double)> activations; // Stores activation functions
-    std::vector<double(*)(double)> derivatives; // Stores derivatives of activation functions
+    std::vector<double> delta;
+    std::vector<double(*)(double*)> activations; // Stores activation functions
+    std::vector<double(*)(double*)> derivatives; // Stores derivatives of activation functions
 
     NNTaskManager* manager;
 

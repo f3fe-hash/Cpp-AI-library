@@ -105,21 +105,23 @@ std::vector<double> NeuralNetwork::forward(std::vector<double> X)
     // Check that can forward
     if (layers.size() <= 1)
         throw NNerror("Only 1 layer found in Neural Network. Can't forward network");
-
-    // Set input layer (first layer)
-    layers[0] = std::vector<Neuron>(X.size());
-    for (int i = 0; i < (int)X.size(); i++)
-    {
-        layers[0][i].connections = {X[i]}; // Set input values as neuron inputs (not weights)
-        // Set weights as needed, for now, assuming weights are set elsewhere
-    }
+    
+    this->delta = X;
 
     // Propagate through each layer
-    for (int layer_idx = 1; layer_idx < (int)layers.size(); layer_idx++)
+    for (int layer_idx = 0; layer_idx < (int)layers.size(); layer_idx++)
     {
+        std::vector<NNTask*> tasks;
         for (int neuron_idx = 0; neuron_idx < (int)layers[layer_idx].size(); neuron_idx++)
         {
-
+            Neuron n = layers[layer_idx][neuron_idx];
+            NNArgs args = {(layer_idx == 0) ? (double *)X.data() : (double *)this->delta.data(),
+                        (double *)n.connections.data(),
+                        n.bias,
+                        (int)n.connections.size(),
+                        activations[layer_idx]};
+            
+            tasks.push_back(manager->new_task(&args));
             /*
             double net_input = 0.0;
             // Sum the weighted inputs from the previous layer's neurons
@@ -131,19 +133,16 @@ std::vector<double> NeuralNetwork::forward(std::vector<double> X)
             net_input += layers[layer_idx][neuron_idx].bias; // Add bias
 
             // Apply activation function
-            layers[layer_idx][neuron_idx].connections[0] = activations[layer_idx](net_input);
+            layers[layer_idx][neuron_idx].connections[0] = activations[layer_idx](&net_input);
             */
+        }
+        for (int i = 0; i < tasks.size(); i++)
+        {
+            this->delta[i] = manager->finish_task(tasks[i]);
         }
     }
 
-    // Collect the output from the last layer
-    std::vector<double> output;
-    for (int i = 0; i < (int)layers.back().size(); i++)
-    {
-        output.push_back(layers.back()[i].connections[0]);
-    }
-
-    return output;
+    return this->delta;
 }
 
 /*
@@ -183,7 +182,7 @@ double NeuralNetwork::backpropagate(std::vector<double> X, std::vector<double> y
     {
         double output_error = output[i] - y[i];
         // Use derivative of activation function
-        deltas[last_layer][i] = output_error * derivatives[last_layer](layers[last_layer][i].connections[0]);
+        deltas[last_layer][i] = output_error * derivatives[last_layer](&layers[last_layer][i].connections[0]);
     }
 
     // Compute deltas for hidden layers
@@ -198,7 +197,7 @@ double NeuralNetwork::backpropagate(std::vector<double> X, std::vector<double> y
                 hidden_error += deltas[layer + 1][j] * layers[layer + 1][j].connections[i];
             }
             // Use derivative of activation function
-            deltas[layer][i] = hidden_error * derivatives[layer](layers[layer][i].connections[0]);
+            deltas[layer][i] = hidden_error * derivatives[layer](&layers[layer][i].connections[0]);
         }
 
         if (layer == 0)
