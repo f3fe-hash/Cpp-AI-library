@@ -23,8 +23,10 @@ Installation
 
 ```bash
 
+make compiler-install # Install compilers
+
 # Compile and install the library
-make
+make build
 sudo make install
 
 ```

@@ -44,7 +44,7 @@ BLUE   = \033[34m
 BOLD  = \033[1m
 RESET = \033[0m
 
-.PHONY: all build help clean install uninstall
+.PHONY: all build help clean install uninstall compiler-install
 
 all: help
 

@@ -4,6 +4,9 @@
 NeuralNetwork::NeuralNetwork(ErrorMeasure merr, bool progressbar) : merr(merr), bar(progressbar)
 {
     this->manager = new NNTaskManager();
+#ifdef DEBUG
+    std::cout << "Initialized manager" << std::endl;
+#endif
 }
 
 NeuralNetwork::~NeuralNetwork()
@@ -105,44 +108,54 @@ std::vector<double> NeuralNetwork::forward(std::vector<double> X)
     // Check that can forward
     if (layers.size() <= 1)
         throw NNerror("Only 1 layer found in Neural Network. Can't forward network");
-    
-    this->delta = X;
 
     // Propagate through each layer
+    std::vector<double> delta = X;
     for (int layer_idx = 0; layer_idx < (int)layers.size(); layer_idx++)
     {
+#ifdef DEBUG
+        std::cout << "Created task vector" << std::endl;
+#endif
         std::vector<NNTask*> tasks;
+        delta.resize((int)layers[layer_idx].size());
         for (int neuron_idx = 0; neuron_idx < (int)layers[layer_idx].size(); neuron_idx++)
         {
             Neuron n = layers[layer_idx][neuron_idx];
-            NNArgs args = {(layer_idx == 0) ? (double *)X.data() : (double *)this->delta.data(),
-                        (double *)n.connections.data(),
-                        n.bias,
-                        (int)n.connections.size(),
-                        activations[layer_idx]};
-            
-            tasks.push_back(manager->new_task(&args));
-            /*
-            double net_input = 0.0;
-            // Sum the weighted inputs from the previous layer's neurons
-            for (int prev_neuron_idx = 0; prev_neuron_idx < (int)layers[layer_idx - 1].size(); prev_neuron_idx++)
-            {
-                // Multiply the output from the previous layer neuron by the weight of the connection
-                net_input += layers[layer_idx - 1][prev_neuron_idx].connections[0] * layers[layer_idx][neuron_idx].connections[prev_neuron_idx];
-            }
-            net_input += layers[layer_idx][neuron_idx].bias; // Add bias
 
-            // Apply activation function
-            layers[layer_idx][neuron_idx].connections[0] = activations[layer_idx](&net_input);
-            */
+            NNArgs* args = new NNArgs();
+            args->input       = (double *)delta.data();
+            args->weights     = (double *)n.connections.data();
+            args->bias        = n.bias,
+            args->num_weights = (int)n.connections.size();
+            args->activation  = activations[layer_idx];
+            delta.clear();
+#ifdef DEBUG
+            std::cout << "Configured arguments" << std::endl;
+#endif
+            
+            tasks.push_back(manager->new_task(args));
+#ifdef DEBUG
+            std::cout << "Created task" << std::endl;
+#endif
         }
-        for (int i = 0; i < tasks.size(); i++)
+#ifdef DEBUG
+        std::cout << "Finishing tasks" << std::endl;
+#endif
+        delta.resize((int)layers[layer_idx].size());
+        for (int i = 0; i < (int)layers[layer_idx].size(); i++)
         {
-            this->delta[i] = manager->finish_task(tasks[i]);
+            delta[i] = manager->finish_task(tasks[i]);
+#ifdef DEBUG
+            std::cout << "Finished task #" << i + 1 << std::endl;
+#endif
+            delete tasks[i];       // Delete the NNTask object
         }
+        tasks.clear();
     }
 
-    return this->delta;
+    std::cout << delta.size() << std::endl;
+
+    return delta;
 }
 
 /*

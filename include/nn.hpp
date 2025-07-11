@@ -27,6 +27,8 @@
 #include "nnerrors.h"
 #include "task.hpp"
 
+//#define DEBUG
+
 typedef struct
 {
     std::vector<std::vector<double>> X_train;
@@ -60,7 +62,6 @@ typedef struct
 class NeuralNetwork
 {
     std::vector<std::vector<Neuron>> layers; // Each layer contains a vector of Neurons
-    std::vector<double> delta;
     std::vector<double(*)(double*)> activations; // Stores activation functions
     std::vector<double(*)(double*)> derivatives; // Stores derivatives of activation functions
 
