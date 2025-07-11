@@ -25,6 +25,7 @@
 
 #include "activations.h"
 #include "nnerrors.h"
+#include "task.hpp"
 
 typedef struct
 {
@@ -60,6 +61,8 @@ class NeuralNetwork
     std::vector<std::vector<Neuron>> layers; // Each layer contains a vector of Neurons
     std::vector<double(*)(double)> activations; // Stores activation functions
     std::vector<double(*)(double)> derivatives; // Stores derivatives of activation functions
+
+    NNTaskManager* manager;
 
     ErrorMeasure merr;
 

@@ -51,33 +51,35 @@ all: help
 # Rule to build the object files
 build: $(BUILD_DIR) $(LIB_NAME)
 
+rebuild: clean build
+
 $(BUILD_DIR):
 	clear
 	@mkdir -p $(BUILD_DIR)
 
 # Rule to compile C source files into object files
 $(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
-	@printf "$(GREEN)Building C object $@... "
+	@printf "$(GREEN)Building C object $@... $(RESET)"
 	@$(CC) $(CFLAGS) -I$(INC_DIR) -c $< -o $@
-	@printf "Done $(RESET)\n"
+	@printf "$(GREEN)Done $(RESET)\n"
 
 # Rule to compile C++ source files into object files
 $(BUILD_DIR)/%.cpp.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
-	@printf "$(BLUE)Building CXX object $@... "
+	@printf "$(BLUE)Building CXX object $@... $(RESET)"
 	@$(CXX) $(CXXFLAGS) -I$(INC_DIR) -c $< -o $@
-	@printf "Done $(RESET)\n"
+	@printf "$(BLUE)Done $(RESET)\n"
 
 # Rule to compile Fortran source files into object files
 $(BUILD_DIR)/%.f90.o: $(SRC_DIR)/%.f90 | $(BUILD_DIR)
-	@printf "$(YELLOW)Building Fortran object $@... "
+	@printf "$(YELLOW)Building Fortran object $@... $(RESET)"
 	@$(GFORT) $(GFORTFLAGS) -I$(INC_DIR) -c $< -o $@
-	@printf "Done $(RESET)\n"
+	@printf "$(YELLOW)Done $(RESET)\n"
 
 # Rule to create the static library
 $(LIB_NAME): $(OBJS)
-	@printf "$(RED)$(BOLD)Linking objects into $@... "
+	@printf "$(RED)$(BOLD)Linking objects into $@... $(RESET)"
 	@$(LD) $(LDFLAGS) -o $(LIB_NAME) $(OBJS)
-	@printf "Done\n$(RESET)"
+	@printf "$(RED)Done\n$(RESET)"
 
 # Test build variables
 test: $(LIB_NAME) $(C_OBJS)
@@ -102,6 +104,14 @@ install:
 uninstall: $(INCS)
 	rm -rf $(AI) $(USR_LIB)/$(LIB_NAME)
 
+compiler-install:
+	@sudo apt install -y gcc
+	@printf "$(GREEN) Sucessfully installed gcc$(RESET)\n"
+	@sudo apt install -y g++
+	@printf "$(GREEN) Sucessfully installed g++$(RESET)\n"
+	@sudo apt install -y gfortran
+	@printf "$(GREEN) Sucessfully installed gcc, g++, and gfortran$(RESET)\n"
+
 # Clean rule to remove build directory and library
 clean:
 	@rm -rf $(BUILD_DIR) $(USR_LIB)/$(LIB_NAME)
@@ -109,8 +119,10 @@ clean:
 help:
 	@echo "Usage:"
 	@echo "  make build            - Build the library"
+	@echo "  make rebuild          - Rebuild the library - mainly for development"
 	@echo "  make clean            - Clean build files"
 	@echo "  make install          - Install the library"
 	@echo "  make uninstall        - Uninstall the library"
-	@echo "  make test TEST=<name> - Build and run a test (without .cpp extension)"
+	@echo "  make compiler-install - Install compilers for the Makefile: gcc, g++, and gfortran"
+	@echo "  make test TEST=<name> - Build and run a test"
 	@echo "  make help             - Show this help message"

@@ -2,7 +2,9 @@
 
 // Constructor initializes the neural network with settings
 NeuralNetwork::NeuralNetwork(ErrorMeasure merr, bool progressbar) : merr(merr), bar(progressbar)
-{}
+{
+    this->manager = new NNTaskManager();
+}
 
 NeuralNetwork::~NeuralNetwork()
 {}
@@ -117,6 +119,8 @@ std::vector<double> NeuralNetwork::forward(std::vector<double> X)
     {
         for (int neuron_idx = 0; neuron_idx < (int)layers[layer_idx].size(); neuron_idx++)
         {
+
+            /*
             double net_input = 0.0;
             // Sum the weighted inputs from the previous layer's neurons
             for (int prev_neuron_idx = 0; prev_neuron_idx < (int)layers[layer_idx - 1].size(); prev_neuron_idx++)
@@ -128,6 +132,7 @@ std::vector<double> NeuralNetwork::forward(std::vector<double> X)
 
             // Apply activation function
             layers[layer_idx][neuron_idx].connections[0] = activations[layer_idx](net_input);
+            */
         }
     }
 
